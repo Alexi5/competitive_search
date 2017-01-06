@@ -47,6 +47,7 @@ describe("Testing some basic functionality for the heuristics", function(){
 			for(var z = 0; z < 7; z++){
 				s = s.move( Math.floor(Math.random() * s.width ) )
 			}
+			
 			expect( -heuristic(s, 'x') == heuristic(s, 'o')).to.equal(true);;
 		}
 	});
@@ -56,6 +57,9 @@ describe("Testing some basic functionality for the heuristics", function(){
 	   there are equal numbers of pieces on the board, 'x' has more in a line 
 	   together than 'o' does. */
 	it("It returns a higher score when 'x' has two in a single line, and 'o' has two disconnected", function(){
+		//move func
+		// takes a location and returns new state 
+
 		//Make a new game state
 		var s = new State();
 		s = s.move(1)  //X moves
@@ -64,6 +68,8 @@ describe("Testing some basic functionality for the heuristics", function(){
 		s = s.move(1)  //X moves
 		s = s.move(0)  //O moves
 		var higher = heuristic(s, 'x')
+		// console.log('lower', lower)
+		// console.log('higher', higher)
 		expect(typeof lower == 'number').to.equal(true);
 		expect(typeof higher == 'number').to.equal(true);
 		expect(lower < higher).to.equal(true);

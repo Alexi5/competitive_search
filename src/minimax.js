@@ -79,7 +79,9 @@ Similarly, if you passed it ["as","xxxxx","dns"] and
 var max = function(arr, func){
 	return arr.reduce(function(tuple, cur, index){
 		var value = func(cur)
-		return (tuple.value >= value) ? tuple : {element: cur, value: value};
+		return (tuple.value >= value)
+			? tuple 
+			: {element: cur, value: value};
 	},{element: arr[0], value: func(arr[0])}).element;
 }
 
@@ -96,10 +98,12 @@ Output: A number evaluating how good the state is from
 the perspective of the player who is maximizing.
 
 A useful method on state here would be state.numLines.
+
 This function takes an integer and a player
 like this "state.numLines(2,'x')" and returns the 
 number of lines of that length which that player
-has.  That is, it returns the number of contiguous linear
+has.  
+That is, it returns the number of contiguous linear
 pieces of that length that that player has.
 
 This is useful because, generally speaking, it is better 
@@ -108,27 +112,46 @@ to have longer lines than shorter lines.
 
 You'll want to pass the tests defined in minimax_specs.js.
 */
+//scoring values after each player has moved
 var heuristic = function(state, maximizingPlayer){
 
-	//This is how you can retrieve the minimizing player.
+    //opposite players score will be the negative of curr player's score
+    // var totalScore = (7*4)+(6*4)+(2*(4*4));
+	var maxPlayerPoints, minPlayerPoints = 0;
+	var minPlayerScore, minPlayerScore = 0;
+
+	//current player
     var minimizingPlayer = (maximizingPlayer == 'x') ? 'o' : 'x';
 
-	//An example.
-    var linesOfLengthTwoForX = state.numLines(2, 'x')
+    //numLines === number of spots the player holds
+    //the higher the number goes the better the score (4 lines == win)
+    //numLines = (how many times the player has "#" pieces in row )
+    var twoPeicesInARowMin = state.numLines(2,minimizingPlayer)
+    var threePeicesInARowMin = state.numLines(3,minimizingPlayer)
+    var fourPeicesInARowMin = state.numLines(4,minimizingPlayer)
 
-    //Your code here.  Don't return random, obviously.
-	return Math.random()
+    var twoPeicesInARowMax = state.numLines(2,maximizingPlayer)
+    var threePeicesInARowMax = state.numLines(3,maximizingPlayer)
+    var fourPeicesInARowMax = state.numLines(4,maximizingPlayer)
+
+    //points per player
+    maxPlayerPoints = (twoPeicesInARowMax+threePeicesInARowMax+fourPeicesInARowMax)
+
+    minPlayerPoints = (twoPeicesInARowMin+threePeicesInARowMin+fourPeicesInARowMin)
+
+    //zero sum --> final score for player
+    maxPlayerScore = maxPlayerPoints-minPlayerPoints
+
+	return maxPlayerScore
 }
-
 
 
 /*
 The function "minimax" is one you must write.
 
-Input: state, depth, maximizingPlayer.  The state is 
-an instance of a state object.  The depth is an integer 
-greater than zero; when it is zero, the minimax function
-should return the value of the heuristic function.  
+Input: state, depth, maximizingPlayer.  
+The state is an instance of a state object.  
+The depth is an integer greater than zero; when it is zero, the minimax function should return the value of the heuristic function.  
 
 Output: Returns a number evaluating the state, just
 like heuristic does.
@@ -142,11 +165,30 @@ which returns whether the next moving player is 'x' or 'o',
 to see if you are maximizing or minimizing.
 */
 var minimax = function(state, depth, maximizingPlayer){
-	var minimizingPlayer = (state.maximizingPlayer == 'x') ? 'o' : 'x';
+	var minimizingPlayer = (maximizingPlayer == 'x') ? 'o' : 'x';
+	//nextStates() returns possible next states
 	var possibleStates = state.nextStates();
 	var currentPlayer = state.nextMovePlayer;
-	//Your code here.
-	return Math.random();
+	
+	//if at final state or no possible states left
+	if(depth == 0 || possibleStates.length == 0){
+		return heuristic(state, maximizingPlayer)
+	}
+
+	//create new possible board configurations
+	var futureStates = possibleStates.map( nextState => {
+		//recursively call this function with depth-1 and next state
+		return minimax(nextState, depth-1, maximizingPlayer)
+	})
+
+	//if current player is the maxPlayer
+	//return (pick) the biggest state value
+	if(currentPlayer === maximizingPlayer){
+		return Math.max.apply(null, futureStates)
+	} else {
+		return Math.min.apply(null, futureStates)
+	}
+
 }
 
 
